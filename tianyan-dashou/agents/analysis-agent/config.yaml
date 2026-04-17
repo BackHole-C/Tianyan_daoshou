@@ -1,0 +1,76 @@
+# Analysis Agent 配置文件
+
+# 模型配置
+model:
+  # 产量预测模型
+  yield_prediction:
+    version: "v2"
+    model_type: "lstm"  # linear, lstm, transformer
+    input_features:
+      - "ndvi_mean"
+      - "ndvi_peak"
+      - "ndvi_slope"
+      - "cum_temp"
+      - "cum_rainfall"
+      - "area_mu"
+    output_features:
+      - "predicted_yield"
+      - "confidence"
+    
+  # 病虫害识别模型
+  disease_detection:
+    enabled: true
+    models:
+      - name: "rice_blast"
+        threshold: 0.15
+        window_days: 3
+      - name: "sheath_blight"
+        threshold: 0.12
+        window_days: 4
+      - name: "brown_planthopper"
+        threshold: 0.10
+        window_days: 5
+
+# 分析配置
+analysis:
+  # NDVI分析
+  ndvi:
+    moving_average_window: 7  # 7天移动平均
+    anomaly_threshold: 0.15  # 异常阈值
+  
+  # 产量预测
+  yield:
+    prediction_horizon: 60  # 预测60天
+    confidence_interval: 0.95  # 95%置信区间
+  
+  # 风险评估
+  risk:
+    levels:
+      - {name: "normal", min: 0, max: 0.05, level: 1}
+      - {name: "attention", min: 0.05, max: 0.15, level: 2}
+      - {name: "warning", min: 0.15, max: 0.30, level: 3}
+      - {name: "danger", min: 0.30, max: 1.0, level: 4}
+
+# 数据库配置
+database:
+  postgres:
+    url: "postgresql://user:pass@db:5432/tianyan"
+
+# 存储配置
+storage:
+  model_path: "../../data/models"
+  output_path: "../../data/analysis_results"
+
+# 任务配置
+task:
+  schedule:
+    enabled: true
+    interval: "daily"  # 每日执行
+    time: "10:00"  # 上午10点
+
+# 日志配置
+logging:
+  level: "INFO"
+  file: "../../logs/analysis-agent.log"
+  rotation: "7 days"
+  retention: "30 days"

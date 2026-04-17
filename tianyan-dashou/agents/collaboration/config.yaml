@@ -1,0 +1,67 @@
+# Collaboration 配置文件
+
+# 飞书配置
+feishu:
+  # 应用信息
+  app_id: "your_app_id"
+  app_secret: "your_app_secret"
+  
+  # 消息推送
+  message:
+    enabled: true
+    default_receiver: "your_chat_id"
+    max_retries: 3
+    retry_interval: 5  # 秒
+  
+  # 多维表格
+  bitable:
+    enabled: true
+    app_token: "your_bitable_app_token"
+    table_id: "your_bitable_table_id"
+    view_id: "your_bitable_view_id"
+  
+  # 文档
+  doc:
+    enabled: true
+    template_folder: "your_template_folder_token"
+
+# 消息配置
+message:
+  # 预警消息模板
+  alert_template: "templates/alert_template.md"
+  
+  # 周报模板
+  weekly_report_template: "templates/weekly_report_template.md"
+  
+  # 保险风险简报模板
+  insurance_report_template: "templates/insurance_report_template.md"
+
+# 数据库配置
+database:
+  postgres:
+    url: "postgresql://user:pass@db:5432/tianyan"
+
+# 存储配置
+storage:
+  templates_path: "templates"
+  output_path: "../../data/collaboration_output"
+
+# 任务配置
+task:
+  # 周报生成
+  weekly_report:
+    enabled: true
+    day: "monday"  # 周一
+    time: "09:00"  # 上午9点
+  
+  # 预警检查
+  alert_check:
+    enabled: true
+    interval: "30 minutes"  # 每30分钟检查一次
+
+# 日志配置
+logging:
+  level: "INFO"
+  file: "../../logs/collaboration-agent.log"
+  rotation: "7 days"
+  retention: "30 days"

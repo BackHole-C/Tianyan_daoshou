@@ -1,0 +1,25 @@
+# Web 后台 API 依赖文件
+
+# 核心依赖
+python==3.10
+fastapi==0.104.1
+uvicorn==0.24.0
+
+# 数据处理
+pandas==2.0.3
+numpy==1.24.4
+
+# 数据库
+sqlalchemy==2.0.23
+psycopg2-binary==2.9.9
+
+# 认证
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
+# 工具
+pydantic==2.5.0
+pydantic-settings==2.1.0
+yaml==0.2.5
+python-dotenv==1.0.0
+loguru==0.7.2
