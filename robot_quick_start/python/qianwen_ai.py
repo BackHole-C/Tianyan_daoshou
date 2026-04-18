@@ -11,6 +11,11 @@ import logging
 import requests
 
 logger = logging.getLogger(__name__)
+import sys
+handler = logging.StreamHandler(sys.stdout)
+handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
 
 class QianWenAI:
     def __init__(self, api_key):
@@ -78,8 +83,13 @@ class QianWenAI:
             logger.error("AI API调用超时")
             return "抱歉，AI响应超时，请稍后重试"
         except Exception as e:
-            logger.error(f"AI调用异常：{str(e)}")
-            return f"抱歉，AI服务暂时不可用：{str(e)}"
+            import traceback
+            error_detail = traceback.format_exc()
+            print(f"AI调用异常: {type(e).__name__}: {str(e)}", flush=True)
+            print(f"详细异常:\n{error_detail}", flush=True)
+            logger.error(f"AI调用异常：{type(e).__name__}: {str(e)}")
+            logger.error(f"详细异常：{error_detail}")
+            return f"抱歉，AI服务暂时不可用：{type(e).__name__}"
 
 
 def create_ai_client():

@@ -9,7 +9,7 @@ from flask import Flask, jsonify
 from dotenv import load_dotenv, find_dotenv
 from qianwen_ai import QianWenAI
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', force=True)
 
 load_dotenv(find_dotenv())
 
@@ -32,6 +32,9 @@ if DASHSCOPE_API_KEY:
 else:
     logging.warning("未配置DASHSCOPE_API_KEY，AI功能将不可用")
 
+# 消息去重集合
+processed_messages = set()
+
 
 @event_manager.register("url_verification")
 def request_url_verify_handler(req_data: UrlVerificationEvent):
@@ -44,6 +47,13 @@ def request_url_verify_handler(req_data: UrlVerificationEvent):
 def message_receive_event_handler(req_data: MessageReceiveEvent):
     sender_id = req_data.event.sender.sender_id
     message = req_data.event.message
+    
+    # 消息去重处理
+    if message.message_id in processed_messages:
+        logging.info(f"消息已处理过: {message.message_id}")
+        return jsonify()
+    processed_messages.add(message.message_id)
+    
     logging.info(f"收到消息: chat_type={message.chat_type}, message_type={message.message_type}")
     logging.info(f"消息内容: {message.content}")
 
@@ -102,9 +112,15 @@ def msg_error_handler(ex):
 
 @app.route("/", methods=["POST"])
 def callback_event_handler():
-    event_handler, event = event_manager.get_handler_with_event(VERIFICATION_TOKEN, ENCRYPT_KEY)
-    return event_handler(event)
+    try:
+        event_handler, event = event_manager.get_handler_with_event(VERIFICATION_TOKEN, ENCRYPT_KEY)
+        return event_handler(event)
+    except Exception as e:
+        logging.error(f"处理回调异常: {type(e).__name__}: {str(e)}")
+        import traceback
+        logging.error(f"详细异常:\n{traceback.format_exc()}")
+        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=3000, debug=True)
+    app.run(host="0.0.0.0", port=3000, debug=False)
