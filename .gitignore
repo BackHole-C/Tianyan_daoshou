@@ -1,0 +1,53 @@
+# 敏感文件
+.env
+.env.local
+.env.*.local
+
+# 虚拟环境
+robot_venv/
+venv/
+env/
+
+# 编译产物
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 系统文件
+.DS_Store
+Thumbs.db
+__MACOSX/
+
+# 日志文件
+*.log
+
+# 编辑器文件
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 安装包
+dist/
+build/
+*.egg-info/
+
+# 依赖
+node_modules/
+
+# 临时文件
+temp/
+tmp/
+
+# 测试文件
+coverage/
+.coverage
+
+# Docker
+Dockerfile.local
+
+# 其他
+.env.example
+.env.template
