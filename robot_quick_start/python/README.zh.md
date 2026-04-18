@@ -1,140 +1,206 @@
-# 快速开发机器人
+# 飞书智能机器人 - 快速开发指南
 
-> ⚠️ 本教程为了方便实现，使用了反向代理工具（ngrok），该工具仅适用于开发测试阶段，不可用于生产环境。使用前需要确认是否符合所在公司网络安全政策。
+> ⚠️ 本教程为了方便实现，使用了反向代理工具（ngrok），该工具仅适用于开发测试阶段，不可用于生产环境。
 
+本示例介绍如何使用飞书开放平台机器人能力，集成通义千问大模型，实现智能农业助手功能。
 
-本示例介绍如何使用开放平台机器人能力，完成机器人接收用户消息，并且回复消息的处理。可以基于此示例扩展机器人事件处理能力。
+## 核心功能
+
+### 🤖 AI智能对话
+- **通义千问大模型**：集成阿里云通义千问，支持农业知识智能问答
+- **病虫害咨询**：识别水稻常见病害，提供防治建议
+- **农业知识问答**：解答种植技术、农业保险等问题
 
 ## 运行环境
 
 - [Python 3](https://www.python.org/)
 - [ngrok](https://ngrok.com/download) （内网穿透工具）
+- [阿里云DashScope](https://dashscope.console.aliyun.com/) （通义千问API）
 
 ## 准备工作
 
-1、在[开发者后台](https://open.feishu.cn/app/) **新建企业自建应用**，点击应用名称进入应用详情页。
+### 1. 飞书应用配置
+1. 在[开发者后台](https://open.feishu.cn/app/) **新建企业自建应用**
+2. 获取应用凭证：
+   - `App ID` 和 `App Secret`（凭证与基础信息页面）
+   - `Encrypt Key` 和 `Verification Token`（事件订阅页面）
 
-2、点击**凭证与基础信息**切换页面，拿到 `App ID` 和 `App Secret`值，点击**事件订阅**切换页面：拿到 `Encrypt Key` 和 `Verification Token` 值。
+### 2. 通义千问API配置
+1. 登录 [阿里云DashScope](https://dashscope.console.aliyun.com/)
+2. 开通服务（有免费额度：100万tokens/月）
+3. 创建API密钥，复制 `API Key`
 
-3、拉取最新代码到本地，并进入对应目录。
+## 快速开始
 
-  ```commandline
-  git clone https://github.com/larksuite/lark-samples.git
-  cd lark-samples/robot_quick_start/python
-  ```
+### 1. 配置环境变量
 
-4、修改环境值
+修改 `robot_quick_start/python/.env` 文件：
 
-修改`.env`文件中应用凭证数据为真实数据。
+```env
+# 飞书应用信息
+APP_ID=cli_xxxxxxxxxxxxx
+APP_SECRET=xxxxxxxxxxxxxxxx
+VERIFICATION_TOKEN=xxxxxxxxxxxxxxxx
+ENCRYPT_KEY=
+LARK_HOST=https://open.feishu.cn
 
-  ```text
-  APP_ID=cli_9fxxxx00b
-  APP_SECRET=EX6xxxxOF
-  APP_VERIFICATION_TOKEN=cq3xxxxxxkUS
-  ENCRYPT_KEY=
-  ```
+# 通义千问API（AI功能）
+DASHSCOPE_API_KEY=sk-xxxxxxxxxxxxxxxx
+```
 
-以上参数可以在 [开发者后台](https://open.feishu.cn/app) 查看，其中 Encrypt Key 可以为空。
+### 2. 本地运行
 
-## docker运行
-
-运行之前需要确保 [Docker](https://www.docker.com/) 已经安装。docker运行与下方本地运行二选一即可。
-
-**mac/linux**
+**Windows**
 
 ```commandline
-sh exec.sh
+cd c:\Users\86156\Desktop\Tianyan_daoshou\robot_quick_start\python
+
+# 激活虚拟环境
+robot_venv\Scripts\activate
+
+# 启动服务
+python server.py
 ```
 
-**windows**
-
-```
-.\exec.ps1
-```
-
-## 本地运行
-
-1、创建并激活一个新的虚拟环境
-
-**mac/linux**
+**macOS/Linux**
 
 ```commandline
-python3 -m venv venv
-. venv/bin/activate
+cd robot_quick_start/python
+
+# 激活虚拟环境
+source robot_venv/bin/activate
+
+# 启动服务
+python server.py
 ```
 
-**windows**
+### 3. 配置内网穿透
 
 ```commandline
-python3 -m venv venv
-venv\Scripts\activate
+# 启动 ngrok
+ngrok http 3000
+
+# 复制生成的公网地址（如 https://xxxx.ngrok.io）
 ```
 
-激活后，终端会显示虚拟环境的名称
+### 4. 飞书开发者后台配置
+
+1. **启用机器人**：点击机器人 → 打开启用机器人开关
+
+2. **配置事件订阅**：
+   - 请求网址 URL：`https://你的ngrok地址`
+   - 添加事件：`im.message.receive_v1`
+
+3. **申请权限**：
+   - `im:message` - 获取与发送消息
+   - `im:message:send_as_bot` - 以机器人身份发送消息
+
+4. **发布应用**：
+   - 版本管理与发布 → 创建版本 → 申请发布
+
+## 使用方法
+
+### 体验AI对话
+
+1. 在飞书群聊中@机器人并发送消息
+2. 或直接给机器人发私信
+3. 机器人将调用通义千问AI进行智能回复
+
+### 示例问题
 
 ```
-(venv) **** python %
+- "水稻叶片发黄是什么原因？"
+- "如何防治稻瘟病？"
+- "推荐一下水稻品种"
+- "农业保险怎么办理？"
 ```
 
-2、安装依赖
+## 项目结构
 
 ```
-pip install -r requirements.txt
-```     
+robot_quick_start/python/
+├── .env                 # 环境变量配置
+├── server.py           # 机器人主服务 ⭐
+├── api.py              # 飞书API客户端
+├── event.py            # 事件处理
+├── qianwen_ai.py       # 通义千问AI模块 ⭐新增
+├── decrypt.py          # 消息解密
+├── utils.py            # 工具函数
+└── robot_venv/        # Python虚拟环境
+```
 
-3、运行
+## 消息处理流程
 
 ```
-python3 server.py
+用户发送消息
+    ↓
+飞书服务器 → POST / （回调事件）
+    ↓
+ngrok公网 → 机器人服务（http://127.0.0.1:3000）
+    ↓
+server.py 接收并解析消息
+    ↓
+调用通义千问API（qianwen_ai.py）
+    ↓
+获取AI回复
+    ↓
+通过飞书API发送回复
+    ↓
+用户收到AI智能回复
 ```
 
-## 完成配置，体验机器人
+## AI配置说明
 
-机器人接收的消息都会以回调事件请求形式，通过 POST 请求方式，送达到服务端处理。所以本地服务端启动之后，回调事件无法请求到内网，需要配置公网请求 URL。
+### 通义千问模型
 
-配置分为如下两步：使用工具完成内网穿透、在应用的**事件订阅**页面配置公网请求 URL。
+| 配置项 | 说明 |
+|-------|------|
+| 模型名称 | qwen-turbo |
+| API接口 | https://dashscope.aliyuncs.com |
+| 免费额度 | 100万tokens/月 |
+| 响应速度 | 快（适合对话） |
 
-1、使用工具暴露本地服务的公网访问入口，此处给出 ngrok 使用示例，若本地未安装可以访问 [ngrok](https://ngrok.com/download) ，按照教程完成安装。
+### 可升级模型
 
-- 使用以下命令获得公网 URL
+如需更强能力，可修改 `qianwen_ai.py` 中的模型配置：
 
-  **注意**：使用反向代理工具（ngrok）之前需要确定是否符合公司网络安全策略。
+```python
+self.model = "qwen-turbo"      # 当前使用
+# self.model = "qwen-plus"     # 更强
+# self.model = "qwen-max"      # 最强
+```
 
-  **注意**：需要提前在 [ngrok](https://dashboard.ngrok.com/signup) 获取token值。
+## 故障排查
 
-  ```
-  ngrok authtoken <token> // <token>需要替换
-  ngrok http 3000
-  ```
+### 机器人不响应
+```bash
+# 检查服务是否运行
+netstat -an | findstr :3000
 
-2、点击**机器人**切换页面>打开**启用机器人**开关。
+# 检查ngrok状态
+curl http://localhost:4040/api/tunnels
+```
 
-3、在**事件订阅**页面：配置**请求网址 URL**。
+### AI不回复
+- 检查 `DASHSCOPE_API_KEY` 是否配置正确
+- 检查通义千问API余额
+- 查看服务日志中的错误信息
 
-使用工具生成的域名，填写请求网址 URL，如下图所示。
-![image.png](https://sf3-cn.feishucdn.com/obj/open-platform-opendoc/336d89fde0b7a5313ce9f90951cce581_nupZP6M8bb.png)
+### 权限问题
+- 确保已申请 `im:message:send_as_bot` 权限
+- 确保应用已发布
 
-**注意**：配置请求网址URL和发送消息给机器人，都会有请求到后端服务，请求期间需要保证服务为启动状态。
+## 技术栈
 
-4、为机器人选择监听事件。
+| 组件 | 技术 |
+|-----|------|
+| AI大模型 | 通义千问 (qwen-turbo) |
+| 后端框架 | Flask |
+| 消息处理 | 飞书开放平台 API |
+| 内网穿透 | ngrok |
 
-在**事件订阅**页面，点击**添加事件**，选择`接收消息`事件并订阅。
+## 注意事项
 
-5、申请权限
-
-在**权限管理**页面，搜索需要的**权限配置**，并开通权限。
-
-- 依赖权限清单
-    - 获取与发送单聊、群组消息
-    - 获取用户发给机器人的单聊消息
-
-**注意**：`获取用户发给机器人的单聊消息`权限未展示在**已添加事件**中，必须切换到**权限管理**页面开通。
-
-6、在**版本管理与发布**页面：**创建版本**>**申请发布**。
-
-注意：本次涉及需要审核的权限，可以利用 [测试企业与人员功能](https://open.feishu.cn/document/home/introduction-to-custom-app-development/testing-enterprise-and-personnel-functions)
-，生成测试版应用（无需发布，配置直接生效），完成测试。
-
-**注意**：成功发布后，可以根据是否能搜到机器人，判断用户是否在机器人可用性范围内。
-
-7、打开**飞书**，搜索**机器人名称**并开始体验机器人自动回复。
+- ⚠️ ngrok 仅用于开发测试
+- ⚠️ `.env` 文件包含敏感信息，请勿提交到版本控制
+- ⚠️ 使用前确认公司网络安全政策

@@ -1,41 +1,86 @@
-# 天眼助手 (Tianyan Assistant)
+# 天眼稻守 (Tianyan Daoshou)
 
-一个集成飞书机器人和管理后台的智能助手项目，支持群组消息和私聊消息处理。
+基于多源遥感数据 + AI大模型的智慧水稻风险管理与协作平台
+
+## 项目简介
+
+「天眼稻守」是一个集成飞书机器人和管理后台的智能农业管理系统，通过接入卫星遥感数据、通义千问大模型，实现水稻生长全周期智能监测、病虫害识别、产量预测与风险预警，并将分析结果无缝嵌入飞书协作生态。
+
+## 核心功能
+
+### 🤖 飞书智能机器人
+- **AI对话能力**：集成通义千问大模型，支持农业知识智能问答
+- **消息自动处理**：支持群组消息和私聊消息
+- **病虫害咨询**：提供常见水稻病害识别和防治建议
+- **农业知识问答**：解答种植技术、农业保险等问题
+
+### 🔧 管理后台
+- Vue3 + Vite前端框架
+- FastAPI后端服务
+- 智能代理系统（数据采集/分析/协作）
 
 ## 项目结构
 
 ```
 Tianyan_daoshou/
-├── robot_quick_start/         # 飞书机器人快速启动项目
+├── robot_quick_start/         # 飞书机器人项目
 │   └── python/                # Python版本的机器人实现
-│       ├── .env               # 环境变量配置（本地开发用）
-│       ├── .env.example       # 环境变量模板
+│       ├── .env               # 环境变量配置
 │       ├── server.py          # 机器人主服务
 │       ├── api.py             # 飞书API客户端
 │       ├── event.py           # 事件处理
+│       ├── qianwen_ai.py      # 通义千问AI模块 ⭐新增
 │       ├── requirements.txt   # 依赖包
 │       └── robot_venv/        # 虚拟环境
 ├── tianyan-dashou/            # 管理后台
 │   ├── frontend/              # 前端代码
+│   │   ├── src/
+│   │   └── package.json
 │   └── agents/                # 智能代理
-├── .gitignore                 # Git忽略文件
+│       ├── data-agent/        # 数据采集Agent
+│       ├── analysis-agent/    # 分析Agent
+│       └── collaboration/     # 协作Agent
 ├── Project_Requirements.md    # 项目需求文档
-├── Technical_Solution.md      # 技术解决方案
+├── Technical_Solution.md       # 技术解决方案
 └── README.md                  # 项目说明
 ```
 
-## 功能特性
+## 技术架构
 
-### 🤖 飞书机器人
-- 支持群组消息和私聊消息
-- 消息自动回复功能
-- 基于飞书开放平台API
-- 本地部署，安全可控
+```
+┌─────────────────────────────────────────────────────────┐
+│                      用户层                             │
+│    飞书机器人  │  多维表格  │  Web管理后台  │  移动端H5    │
+└─────────────────────────────────────────────────────────┘
+                           │
+                           ▼
+┌─────────────────────────────────────────────────────────┐
+│                   AI Agent中枢层                        │
+│        数据采集Agent  │  分析Agent  │  协作Agent          │
+│        (卫星/气象)    │  (产量预测) │  (飞书集成)         │
+└─────────────────────────────────────────────────────────┘
+                           │
+                           ▼
+┌─────────────────────────────────────────────────────────┐
+│                     数据层                              │
+│     卫星遥感(Sentinel-2)  │  气象数据  │  地块边界数据     │
+└─────────────────────────────────────────────────────────┘
+```
 
-### 🔧 管理后台
-- Vue3 + Vite前端框架
-- 智能代理系统
-- 飞书集成
+## AI技术方案
+
+### 通义千问大模型集成
+- **模型**：通义千问 qwen-turbo
+- **应用场景**：
+  - 🌾 水稻种植知识咨询
+  - 🐛 病虫害识别与防治建议
+  - 📋 农业保险政策解答
+  - � 农业决策支持
+
+### 智能分析能力
+- **产量预测**：基于NDVI时序数据 + 气象因子
+- **病虫害检测**：NDVI突变分析 + 纹理特征识别
+- **风险评估**：地块级风险等级划分
 
 ## 快速开始
 
@@ -43,144 +88,154 @@ Tianyan_daoshou/
 
 #### Python环境
 ```bash
-# 推荐使用Python 3.8+
-# 已创建虚拟环境 robot_venv
+# Python 3.8+ 已安装
+# 虚拟环境位于 robot_quick_start/python/robot_venv/
 ```
 
 #### 飞书应用配置
 1. 在 [飞书开发者平台](https://open.feishu.cn) 创建应用
 2. 启用机器人功能
 3. 申请必要权限：
-   - `im:message`
-   - `im:message:send_as_bot`
+   - `im:message` - 获取消息
+   - `im:message:send_as_bot` - 发送消息
 4. 配置事件订阅：
    - 事件：`im.message.receive_v1`
-   - 请求地址：你的公网地址 + `/webhook/event`
+   - 请求地址：你的公网地址
 
 ### 2. 配置环境变量
 
-复制环境变量模板并填写实际值：
+编辑 `robot_quick_start/python/.env` 文件：
 
-```bash
-cp robot_quick_start/python/.env.example robot_quick_start/python/.env
-```
-
-编辑 `.env` 文件：
-
-```
+```env
 # 飞书应用信息
-APP_ID=your_app_id
-APP_SECRET=your_app_secret
-VERIFICATION_TOKEN=your_verification_token
+APP_ID=cli_xxxxxxxxxxxxx
+APP_SECRET=xxxxxxxxxxxxxxxx
+VERIFICATION_TOKEN=xxxxxxxxxxxxxxxx
 ENCRYPT_KEY=
 LARK_HOST=https://open.feishu.cn
+
+# 通义千问API（AI功能）
+DASHSCOPE_API_KEY=sk-xxxxxxxxxxxxxxxx
 ```
 
-### 3. 安装依赖
-
-```bash
-# 使用虚拟环境安装依赖
-robot_quick_start/python/robot_venv/bin/python -m pip install -r robot_quick_start/python/requirements.txt
-```
-
-### 4. 启动服务
+### 3. 启动服务
 
 ```bash
 # 启动机器人服务
-robot_quick_start/python/robot_venv/bin/python robot_quick_start/python/server.py
+cd c:\Users\86156\Desktop\Tianyan_daoshou\robot_quick_start\python
+robot_venv\bin\python.exe server.py
 
 # 服务将运行在 http://127.0.0.1:3000
 ```
 
-### 5. 配置内网穿透
+### 4. 配置内网穿透
 
 使用 ngrok 实现公网访问：
 
 ```bash
-# 安装 ngrok（如果尚未安装）
-# 注册账号并获取 authtoken
-
 # 启动 ngrok
-ngrok authtoken your_token
 ngrok http 3000
 
-# 获取生成的公网地址，配置到飞书开发者后台
+# 复制生成的公网地址（如 https://xxxx.ngrok.io）
+# 配置到飞书开发者后台的事件订阅
 ```
 
-## 使用方法
-
-### 在飞书群聊中使用
-1. 将机器人添加到群组
-2. @机器人并发送消息
-3. 机器人会自动回复相同的消息
-
-### 私聊机器人
-1. 直接与机器人对话
-2. 机器人会自动回复相同的消息
-
-## 技术栈
-
-- **后端**：Python 3.8+, Flask
-- **前端**：Vue3, Vite
-- **机器人**：飞书开放平台 API
-- **部署**：本地部署 + ngrok 内网穿透
-
-## 项目配置
-
-### 飞书开发者后台配置
+### 5. 飞书开发者后台配置
 
 1. **事件订阅**：
-   - 启用事件订阅
-   - 请求地址：`https://your-ngrok-address.ngrok.io/webhook/event`
-   - 验证令牌：与 `.env` 文件中的 `VERIFICATION_TOKEN` 一致
+   - 请求地址：`https://你的ngrok地址`
+   - 验证令牌：`.env` 中的 `VERIFICATION_TOKEN`
 
 2. **权限管理**：
    - 申请 `im:message` 权限
    - 申请 `im:message:send_as_bot` 权限
 
-3. **版本管理**：
-   - 创建版本
-   - 配置可用范围
-   - 申请发布
+## 使用方法
+
+### AI对话测试
+1. 在飞书群聊中@机器人并发送消息
+2. 或直接给机器人发私信
+3. 机器人将调用通义千问AI进行智能回复
+
+**示例问题**：
+- "水稻叶片发黄是什么原因？"
+- "如何防治稻瘟病？"
+- "本周天气如何？"
+- "推荐一下水稻品种"
+
+## 技术栈
+
+| 层次 | 技术选型 |
+|------|---------|
+| **AI大模型** | 通义千问 (qwen-turbo) |
+| **后端** | Python 3.8+, Flask, FastAPI |
+| **前端** | Vue3, Vite, Element Plus |
+| **机器人** | 飞书开放平台 API |
+| **数据采集** | Python, GDAL, rasterio |
+| **分析模型** | PyTorch, scikit-learn |
+| **部署** | 本地部署 + ngrok 内网穿透 |
+
+## 项目亮点
+
+### 🌾 农业智能化
+- 多源数据融合：卫星遥感 + 气象 + 地块边界
+- AI驱动决策：从经验判断到数据驱动
+
+### 🤖 技术创新
+- **多Agent架构**：数据采集/分析/协作Agent协同
+- **大模型应用**：通义千问赋能农业知识服务
+- **实时监测**：病虫害发现从滞后1-2周 → 实时预警
+
+### 📊 工程落地
+- 飞书生态深度集成
+- 本地化部署，安全可控
+- 模块化设计，易于扩展
 
 ## 开发说明
 
-### 机器人代码结构
+### 核心文件说明
 
-- `server.py`：主服务文件，处理HTTP请求和事件
-- `api.py`：飞书API客户端，封装API调用
-- `event.py`：事件定义和管理器
-- `decrypt.py`：消息解密工具
-- `utils.py`：工具函数
+| 文件 | 功能 |
+|-----|------|
+| `server.py` | 机器人主服务，处理飞书事件和消息 |
+| `api.py` | 飞书API客户端封装 |
+| `event.py` | 事件定义和管理器 |
+| `qianwen_ai.py` | 通义千问AI模块 ⭐ |
+| `decrypt.py` | 消息解密工具 |
 
 ### 消息处理流程
 
-1. 飞书发送事件到机器人服务
-2. 服务接收并解析事件
-3. 根据事件类型调用相应的处理函数
-4. 处理函数生成回复
-5. 发送回复到飞书
+```
+用户发送消息 → 飞书服务器 → ngrok公网 → 机器人服务
+                                                      ↓
+                                              AI处理（通义千问）
+                                                      ↓
+                                              飞书API发送回复
+                                                      ↓
+用户收到AI回复 ← 飞书服务器 ← ngrok公网 ← 机器人服务
+```
 
 ## 故障排查
 
 ### 常见问题
 
-1. **机器人不响应**：
-   - 检查服务是否运行：`http://127.0.0.1:3000`
-   - 检查 ngrok 连接是否正常
+1. **机器人不响应消息**：
+   - 检查服务是否运行：`netstat -an | findstr :3000`
+   - 检查 ngrok 是否正常运行
    - 检查飞书事件订阅配置
 
-2. **权限错误**：
+2. **AI不回复**：
+   - 检查 `DASHSCOPE_API_KEY` 是否配置正确
+   - 检查通义千问API余额
+   - 查看服务日志中的AI调用错误
+
+3. **权限错误**：
    - 确保已申请必要权限
    - 确保应用已发布
 
-3. **环境变量错误**：
-   - 检查 `.env` 文件配置
-   - 确保 `APP_ID` 和 `APP_SECRET` 正确
-
 ## 安全提示
 
-- **敏感信息**：`.env` 文件包含敏感信息，请勿提交到版本控制系统
+- **敏感信息**：`.env` 文件包含敏感信息，请勿提交到版本控制
 - **权限管理**：仅授予必要的权限
 - **网络安全**：使用 HTTPS 连接
 
@@ -188,10 +243,6 @@ ngrok http 3000
 
 MIT License
 
-## 贡献
-
-欢迎提交 Issue 和 Pull Request！
-
 ## 联系方式
 
-如有问题，请联系项目维护者。
+如有问题，请在项目中提交 Issue。
